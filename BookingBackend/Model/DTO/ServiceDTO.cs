@@ -1,6 +1,6 @@
-﻿namespace BookingBackend.Model
+﻿namespace BookingBackend.Model.DTO
 {
-    public class ServiceModel
+    public class ServiceDTO
     {
         public int Id { get; set; }
         public string Name { get; set; }
