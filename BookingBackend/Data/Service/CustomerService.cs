@@ -62,7 +62,8 @@ namespace BookingBackend.Data.Service
             {
                 CustomerModel custo = await _customerRepository.GetByIdCustomer(id);
                 List<CustomerDTO> CustomerDTO = new List<CustomerDTO>();
-               
+                if (custo != null)
+                {
                     CustomerDTO serviceDTO = new CustomerDTO()
                     {
                         Id = custo.Id,
@@ -72,6 +73,8 @@ namespace BookingBackend.Data.Service
                         Nit = custo.Nit,
                         Password = custo.Password
                     };
+                }
+                
                     
                 res.Succes = true;
                 res.Data = CustomerDTO;

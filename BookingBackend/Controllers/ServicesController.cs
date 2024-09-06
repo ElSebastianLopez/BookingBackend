@@ -1,15 +1,19 @@
 ﻿using ApiBook.Models.DTOs;
 using BookingBackend.Data.Service;
 using BookingBackend.Data.Service.IService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace BookingBackend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    
+
     public class ServicesController : ControllerBase
     {
         public readonly IServiceService  _serviceService;
@@ -18,12 +22,14 @@ namespace BookingBackend.Controllers
             _serviceService = serviceService;   
         }
 
+        [Authorize]
         [HttpGet("GetAllService")]
         public async Task<IActionResult> GetAllService()
         {
             Response res = new Response();
             try
             {
+                int id = int.Parse(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
                 return Ok(await _serviceService.GetAllService());
             }
             catch (DbUpdateException dbEx)
