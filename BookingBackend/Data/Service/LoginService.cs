@@ -2,8 +2,12 @@
 using BookingBackend.Data.Repository.IRepository;
 using BookingBackend.Data.Service.IService;
 using BookingBackend.Model;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using System.ComponentModel.DataAnnotations;
+using System.IdentityModel.Tokens.Jwt;
 using System.Runtime.InteropServices.JavaScript;
+using System.Text;
 
 namespace BookingBackend.Data.Service
 {
@@ -29,8 +33,9 @@ namespace BookingBackend.Data.Service
                     res.Succes = false;
                     return new { res = res };
                 }
-                GenerarTokenClaim generarTokenClaim = new GenerarTokenClaim(_config);
-                string token = generarTokenClaim.GenerateToken(customer.FirstOrDefault());
+
+                var tokenService = new GenerarTokenClaim(_config);
+                var token = tokenService.GenerateToken(customer.FirstOrDefault());
                 res.Message = "Credenciales correctas";
                 res.Succes = true;
                 res.Data = customer;
@@ -43,7 +48,19 @@ namespace BookingBackend.Data.Service
             }
         }
 
+        private string GenerateJwtToken()
+        {
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
+            var token = new JwtSecurityToken(
+                issuer: _config["Jwt:Issuer"],
+                audience: _config["Jwt:Audience"],
+                expires: DateTime.Now.AddMinutes(Convert.ToDouble(_config["Jwt:ExpiresInMinutes"])),
+                signingCredentials: credentials);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
 
     }
 }
