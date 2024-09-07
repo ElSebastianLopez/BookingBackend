@@ -37,9 +37,9 @@ namespace BookingBackend.Data.Repository
         {
             if (predicate == null)
             {
-                return await _contextModel.ReservationDetail.ToListAsync();
+                return await _contextModel.ReservationDetail.Include(m=>m.Service).ToListAsync();
             }
-            return await _contextModel.ReservationDetail.Where(predicate).ToListAsync();
+            return await _contextModel.ReservationDetail.Include(m => m.Service).Where(predicate).ToListAsync();
         }
 
         public async Task<ReservationDetailModel> GetByIdReservationDetail(int id)

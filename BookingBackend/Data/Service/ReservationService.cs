@@ -47,11 +47,32 @@ namespace BookingBackend.Data.Service
                             IdReservation = item2.IdReservation,
                             IdService = item2.IdService,
                             ServiceCost = item2.ServiceCost,
+                            service=item2.Service.Name
+                            
                         };
                         reservationDTO.Details.Add(reservationDetailDTO);
 
                     }
                     reservationDTO.Id = item.Id;
+                    reservationDTO.Name = item.Name;
+                    if (item.Status == Status.Creada)
+                    {
+                        reservationDTO.status = "Creada";
+                    }
+                    else if (item.Status == Status.Pagada)
+                    {
+                        reservationDTO.status = "Pagada";
+                    }
+                    else if (item.Status == Status.Cancelada)
+                    {
+                        reservationDTO.status = "Cancelada";
+                    }
+                    else
+                    {
+                        reservationDTO.status = "Eror";
+                    }
+                    reservationDTO.TotalReserveCost = item.TotalReserveCost;
+
                     AllreservationByCustomerDTO.Add(reservationDTO);
                 }
                 res.Succes = true;
@@ -119,7 +140,7 @@ namespace BookingBackend.Data.Service
             Response res = new Response();
             try
             {
-                CustomerModel customer = await _customerRepository.GetByIdCustomer(reservationDTO.IdCustomer);
+                CustomerModel customer = await _customerRepository.GetByIdCustomer((int)reservationDTO.IdCustomer);
                 if (customer == null)
                 {
                     throw new InvalidOperationException("No existe un customer con el id" + reservationDTO.IdCustomer);
@@ -144,7 +165,7 @@ namespace BookingBackend.Data.Service
                 {
                     ReservationModel reservationModel = new ReservationModel()
                     {
-                        IdCustomer = reservationDTO.IdCustomer,
+                        IdCustomer = (int)reservationDTO.IdCustomer,
                         ReservationStartDate = reservationDTO.ReservationStartDate,
                         ReservationEndDate = reservationDTO.ReservationEndDate,
                         ReservationDate = DateTime.Now,
@@ -177,7 +198,7 @@ namespace BookingBackend.Data.Service
                 }
                 else
                 {
-                    ReservationModel EditReserva = await _reservationRepository.GetByIdReservation(reservationDTO.Id);
+                    ReservationModel EditReserva = await _reservationRepository.GetByIdReservation((int)reservationDTO.Id);
                     List<ReservationDetailModel> reservationDet = await _reservationDetailRepository.GetAllReservationDetail(x => x.IdReservation == EditReserva.Id);
                     if (EditReserva.Status == Status.Creada)
                     {
@@ -187,9 +208,13 @@ namespace BookingBackend.Data.Service
                         bool edit = await _reservationRepository.EditReservation(EditReserva);
                         if ((edit))
                         {
+                            var existingDetails = reservationDet.Where(x => x.IdReservation == EditReserva.Id).ToList();
+                            var newServiceIds = reservationDTO.Details.Select(x => x.IdService).ToHashSet();
+
                             foreach (var item in reservationDTO.Details)
                             {
-                                if (!(reservationDet.Any(x => x.IdReservation == item.IdReservation && x.IdService == item.IdService)))
+                                item.IdReservation = EditReserva.Id;
+                                if (!existingDetails.Any(x => x.IdService == item.IdService))
                                 {
                                     ReservationDetailModel detailModel = new ReservationDetailModel()
                                     {
@@ -199,7 +224,13 @@ namespace BookingBackend.Data.Service
                                     };
                                     await _reservationDetailRepository.CreateReservationDetail(detailModel);
                                 }
+                            }
 
+                            var detailsToRemove = existingDetails.Where(x => !newServiceIds.Contains(x.IdService)).ToList();
+
+                            foreach (var detail in detailsToRemove)
+                            {
+                                await _reservationDetailRepository.DeleteReservationDetail(detail);
                             }
 
                         }
@@ -208,7 +239,7 @@ namespace BookingBackend.Data.Service
                         return res;
                     }
 
-                    throw new InvalidOperationException("Error al guardar informacion, Contactese con los administradores de el aplicativo");
+                    throw new InvalidOperationException("Error al guardar informacion, No se puede editar una reserva que cuyo estado no sea creado");
 
                 }
 
@@ -312,6 +343,38 @@ namespace BookingBackend.Data.Service
 
 
                 throw new InvalidOperationException("No se puede cancelar una orden cuyo estado no sea creado ");
+
+
+
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new InvalidOperationException(ex.Message);
+            }
+            catch (Exception)
+            {
+                throw new Exception("Error en el servidor, Contactese con los administradores de el aplicativo");
+            }
+
+        }
+
+        public async Task<Response> BuyReservation(int idReservation)
+        {
+            Response res = new Response();
+            try
+            {
+                ReservationModel Reserva = await _reservationRepository.GetByIdReservation(idReservation);
+                if (Reserva.Status == Status.Creada)
+                {
+                    Reserva.Status = Status.Pagada;
+                    await _reservationRepository.EditReservation(Reserva);
+                    res.Succes = true;
+                    res.Message = "Su reserva fue Pagada correctamente";
+                    return res;
+                }
+
+
+                throw new InvalidOperationException("No se puede pagar una orden cuyo estado no sea creado ");
 
 
 

@@ -1,6 +1,7 @@
 ﻿using ApiBook.Models.DTOs;
 using BookingBackend.Data.Service;
 using BookingBackend.Data.Service.IService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
@@ -10,6 +11,7 @@ namespace BookingBackend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CustomersController : ControllerBase
     {
         public readonly ICustomerService _customerService;

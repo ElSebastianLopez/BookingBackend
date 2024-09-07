@@ -4,11 +4,12 @@ namespace BookingBackend.Model.DTO
 {
     public class ReservationDetailDTO
     {
-        public int Id { get; set; }
+        public int? Id { get; set; }
 
         public int IdService { get; set; }
+        public string? service { get; set; }
 
-        public int IdReservation { get; set; }
+        public int? IdReservation { get; set; }
 
         public decimal ServiceCost { get; set; }
     }

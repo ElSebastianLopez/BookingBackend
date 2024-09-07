@@ -11,5 +11,6 @@ namespace BookingBackend.Data.Service.IService
         Task<Response> DeleteReservation(int id);
         Task<Response> DeleteReservationDet(int idReservation, int idReservationDet);
         Task<Response> CancelReservation(int idReservation);
+        Task<Response> BuyReservation(int idReservation);
     }
 }

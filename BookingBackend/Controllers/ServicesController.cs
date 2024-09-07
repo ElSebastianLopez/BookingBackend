@@ -12,7 +12,8 @@ namespace BookingBackend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    
+    [Authorize]
+
 
     public class ServicesController : ControllerBase
     {
@@ -22,7 +23,7 @@ namespace BookingBackend.Controllers
             _serviceService = serviceService;   
         }
 
-        [Authorize]
+        
         [HttpGet("GetAllService")]
         public async Task<IActionResult> GetAllService()
         {
