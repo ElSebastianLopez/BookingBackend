@@ -1,5 +1,5 @@
 # **Diagrama de Arquitectura**
-##--![Descripción de la imagen](https://i.postimg.cc/yYyTvtKj/Imagen-de-Whats-App-2024-09-04-a-las-23-41-46-fcbfd850.jpg)
+![Descripción de la imagen](https://i.postimg.cc/yYyTvtKj/Imagen-de-Whats-App-2024-09-04-a-las-23-41-46-fcbfd850.jpg)
 
 
 # **Documentación de las Rutas de los Controladores**
